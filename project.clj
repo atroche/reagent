@@ -4,12 +4,13 @@
   :description "A simple ClojureScript interface to React"
 
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/clojurescript "1.8.51"]
+                 [org.clojure/clojurescript "1.8.51"] ;; couple of versions behind
                  [cljsjs/react-dom "15.1.0-0"]
                  [cljsjs/react-dom-server "15.1.0-0"]]
 
   :plugins [[lein-cljsbuild "1.1.3"]
-            [codox "0.9.0"]]
+            ;; should codox be part of a profile?
+            [codox "0.9.0"]]                                ;; 0.9.5 available
 
   :source-paths ["src"]
 

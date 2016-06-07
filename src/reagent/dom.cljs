@@ -11,6 +11,7 @@
 
 (defn module []
   (cond
+
     (some? imported) imported
     (exists? js/ReactDOM) (set! imported js/ReactDOM)
     (exists? js/require) (or (set! imported (js/require "react-dom"))
