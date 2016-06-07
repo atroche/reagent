@@ -37,6 +37,7 @@
     (f)))
 
 (defn- deref-capture [f r]
+  ;; approximately 0 of these functions have docstrings!
   (set! (.-captured r) nil)
   (when (dev?)
     (set! (.-ratomGeneration r) (set! generation (inc generation))))
@@ -49,6 +50,7 @@
     res))
 
 (defn- notify-deref-watcher! [derefed]
+  ;; TIL when-some
   (when-some [r *ratom-context*]
     (let [c (.-captured r)]
       (if (nil? c)
@@ -71,8 +73,11 @@
     (set! (.-watchesArr this) nil)))
 
 (defn- notify-w [this old new]
+  ;; ugh @ these one character variable names.
   (let [w (.-watchesArr this)
         a (if (nil? w)
+            ;; personally I would've put this into a function and named it
+            ;; to capture intent:
             ;; Copy watches to array for speed
             (->> (.-watches this)
                  (reduce-kv #(doto %1 (.push %2) (.push %3)) #js[])
@@ -118,7 +123,13 @@
 
 (defprotocol IReactiveAtom)
 
+;; is the mutable metadata actually used anywhere?
+;; AFAICT it's just functioning as documentation…
 (deftype RAtom [^:mutable state meta validator ^:mutable watches]
+  ;; TIL: “marker” procotols, which don't actually have methods
+  ;; I wish this guy had gotten an answer:
+  ;; http://dev.clojure.org/jira/browse/CLJ-966?focusedCommentId=29183&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-29183
+  ;; I guess it's so people don't have to do like “satisfies ISwap, IReset, etc., to check if something's an atom
   IAtom
   IReactiveAtom
 
@@ -131,7 +142,11 @@
     state)
 
   IReset
+  ;; why is the first param here called a instead of 'this' as elsewhere?
+  ;; … just checked cljs default signature, and it uses 'o', lol
   (-reset! [a new-value]
+    ;; wonder how many people use validators in practice
+    ;; guess they're just trying to keep compatibility with core
     (when-not (nil? validator)
       (assert (validator new-value) "Validator rejected reference state"))
     (let [old-value state]
@@ -140,6 +155,8 @@
         (notify-w a old-value new-value))
       new-value))
 
+  ;; is there some way of being like “hey, act like a normal Atom, except override reset, etc.
+  ;; and then using the default implementation of swap? b/c i imagine this is exactly what default does
   ISwap
   (-swap! [a f]          (-reset! a (f state)))
   (-swap! [a f x]        (-reset! a (f state x)))
@@ -335,7 +352,6 @@
 
 (defn- handle-reaction-change [this sender old new]
   (._handle-change this sender old new))
-
 
 (deftype Reaction [f ^:mutable state ^:mutable ^boolean dirty? ^boolean nocache?
                    ^:mutable watching ^:mutable watches ^:mutable auto-run

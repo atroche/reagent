@@ -39,6 +39,7 @@
 ;; (ratom-perf)
 
 (deftest basic-ratom
+  ;; oh my god I have no idea what this is testing and why
   (let [runs (running)
         start (rv/atom 0)
         sv (reaction @start)
